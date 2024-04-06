@@ -13,12 +13,16 @@ def Training_Testing_Model(file, output_name):
     Parse_CSV = Parse_CSV.dropna()
     X_val = Parse_CSV.iloc[:,[2,4,5]+list(range(7,84))].values
     Y_val = Parse_CSV.iloc[:,-1].values
-    x_training, x_testing, y_training, y_testing = train_test_split(X_val, Y_val, test_size = 0.4)
+    Machine = KNeighborsClassifier(n_neighbors = 3) #3 good approximation without over fitting most accurate for KNN with most reliable accuracy 98%-99% with inf and nan entities dropped
     scale = StandardScaler()
+    x_training, x_testing, y_training, y_testing = train_test_split(X_val, Y_val, test_size = 0.4)
     x_train = scale.fit_transform(x_training)
     x_test = scale.fit_transform(x_testing)
-    Machine = KNeighborsClassifier(n_neighbors = 7) #7 most accurate for KNN with most reliable accuracy 97%-98% with inf and nan entities dropped
-    Machine.fit(x_train, y_training)
+    for _ in range(10):
+        Machine.fit(x_train, y_training)
+        x_training, x_testing, y_training, y_testing = train_test_split(X_val, Y_val, test_size = 0.4)
+        x_train = scale.fit_transform(x_training)
+        x_test = scale.fit_transform(x_testing)
     y_prediction = Machine.predict(x_test)
     print(f"accuracy: {accuracy_score(y_prediction,y_testing)}")
     joblib.dump(Machine, output_name)
