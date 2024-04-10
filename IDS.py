@@ -71,13 +71,20 @@ def Validating_Data(file, input):
     x_test = scale.fit_transform(X_val) #scaling x_testing data
     y_prediction = Machine.predict(x_test) #validation data
     column = [] #initializing empty column
+    Benign = 0 #Initializing Benign entry counts
+    Attack = 0 #Initializing Attacking entry counts
     for i in y_prediction: #for loop iterating over prediction
-        if i == 1:
+        if i == 1: #If attack
             column.append('DoS') #Records DoS 
-        else:
+            Attack = Attack+1 #Iterates the Count for Stats
+        else: #If normal
             column.append('BENIGN') #Or BENIGN
+            Benign = Benign+1 #Iterates teh count for stats
+    print(f"If Normal Data then False Positive Rate is: {Attack/(Benign+Attack)}") #Printing possible FPR for normal data
+    print(f"If Attacking Data then Detection Rate is: {Attack/(Benign+Attack)}") #Printing possible DR for attacking data
     initial_CSV['Label'] = column #Adds new column to CSV datagframe
     initial_CSV.to_csv('Output_flow.csv',index=False) #output as Output_flow.csv file using pandas
+
 
 def main(): #Main function where functionality is determined
     if len(sys.argv) == 4: #Must be length 4
