@@ -27,6 +27,18 @@ def Training_Testing_Model(file, output_name):
     Machine.fit(x_train, Y_val) #Train the machine
     joblib.dump(Machine, output_name) #Output ML model as joblib file.
 
+def True_Values(CSV):
+    true_values = []
+    src_prt = CSV.iloc[:,2].values
+    dest_prt = CSV.iloc[:,3].values
+    for x in range(len(CSV)):
+        if src_prt[x] != 80 and dest_prt[x] != 80:
+            true_values.append(0)
+        else:
+            true_values.append(1)
+    CSV['True Label'] = true_values
+    CSV.to_csv('Output_flow.csv',index=False) #output as Output_flow.csv file using pandas
+
 #Validating_Data takes the CSV validating dataset and the joblib ML file name, it loads the ML into the variable machine, then it loads the csv file into two dataframes. 
 #The first dataframe remains the same and is used to output a modified csv with a label column for visual representation of columns reported as BENIGN or DoS.
 #The second Dataframe is the validation data manipulated so that the columns match on the same order as the training sets and transformed to fit the same standardized input.
@@ -42,7 +54,7 @@ def Validating_Data(file, input):
     for i in y_prediction: #for loop iterating over prediction
         column.append(i) #Or BENIGN
     initial_CSV['Label'] = column #Adds new column to CSV datagframe
-    initial_CSV.to_csv('Output_flow.csv',index=False) #output as Output_flow.csv file using pandas
+    True_Values(initial_CSV)
 
 
 def main(): #Main function where functionality is determined
