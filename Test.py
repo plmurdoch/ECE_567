@@ -1,9 +1,7 @@
 import pandas
 import joblib
-import numpy
 import sys
-from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import MaxAbsScaler
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 import matplotlib.pyplot as plt
@@ -12,13 +10,12 @@ import matplotlib.pyplot as plt
 #Utilizing the unofficial python wrapper for CICFlowmeter, as we could not get the official product to work on kali.
 CICFlowOrder =[2,3,4,6,11,12,13,14,15,16,17,18,19,20,21,22,7,8,32,35,33,34,36,39,40,37,38,41,44,45,42,43,46,47,48,49,28,29,9,10,24,23,25,26,27,50,51,52,53,54,55,77,56,57,58,75,76,69,70,73,71,72,74,78,79,80,81,59,60,31,30,63,64,61,62,67,68,65,66]
 
-#For our testing parameters, we ran the dos attack while conducting SSH traffic on the same server, thus we can isolate the true labels through the use of determining http ports were in use by the attacker.
+#For our testing parameters, we ran the dos attack while conducting SSH traffic on the same server, thus we can isolate the true labels through the use of determining http ports were in use as the dest port from the attacker.
 def True_Values(CSV):
-    true_values = []
-    src_prt = CSV.iloc[:,2].values
-    dest_prt = CSV.iloc[:,3].values
-    for x in range(len(CSV)):
-        if dest_prt[x] != 80:
+    true_values = [] #True value array
+    dest_prt = CSV.iloc[:,3].values #Get destination port values.
+    for x in range(len(dest_prt)): #Iterating through the total dest ports
+        if dest_prt[x] != 80: #if the taget port is not HTTP 
             true_values.append(0)
         else:
             true_values.append(1)
@@ -31,7 +28,7 @@ def Validating_Data(file, input):
     Machine = joblib.load(input) #Load ML joblib dump as machine
     initial_CSV = pandas.read_csv(file) #store initial dataset
     X_val = initial_CSV.iloc[:,CICFlowOrder].values #grab values in the order to match normal input variables
-    scale = StandardScaler() #Load standard scalar
+    scale = MaxAbsScaler() #Load standard scalar
     x_test = scale.fit_transform(X_val) #scaling x_testing data
     y_prediction = Machine.predict(x_test) #validation data
     true_values = []
@@ -45,26 +42,26 @@ def Validating_Data(file, input):
     else:
         initial_CSV = initial_CSV.replace(["BENIGN"], 0) #Binary rep of Benign as 0
         initial_CSV = initial_CSV.replace(["DoS Hulk","DoS Slowhttptest","DoS GoldenEye","DoS slowloris"], 1) #Binary rep of DoS as 1
-        test_values = initial_CSV[:,-1].values
-        for i in test_values:
-            true_values.append(i)
-    FP = 0
-    FN = 0
-    TP = 0
-    TN = 0
-    for i in range(len(y_prediction)):
-        if y_prediction[i] == true_values[i]:
-            if true_values[i] == 0:
+        test_values = initial_CSV[:,-1].values #Grabs last column of labelled csv file
+        for i in test_values: #iterate through dataframe columns
+            true_values.append(i) #Append to a simple list.
+    FP = 0 #False Positives
+    FN = 0 #False Negatives
+    TP = 0 #True Positives
+    TN = 0 #True Negatives
+    for i in range(len(y_prediction)): #Iterating through the prediction array.
+        if y_prediction[i] == true_values[i]: #Comparing predicted values with the true values
+            if true_values[i] == 0: #If they match on Negative then True negative.
                 TN = TN+1
-            else:
+            else: #If they match on Positive then true positive
                 TP = TP+1
-        else:
-            if true_values[i] == 1:
-                FN = FN+1
-            else:
-                FP = FP+1
-    FPR = (FP/(FP+TN))
-    DR = (TP/(TP+FN))
+        else: #If they do not match
+            if true_values[i] == 1: #If true value is an attack
+                FN = FN+1 #False negative
+            else: #If true value is not an attack 
+                FP = FP+1 #Then False positive.
+    FPR = (FP/(FP+TN)) #False Positive Rates
+    DR = (TP/(TP+FN)) #False Negatvie Rates
     print("----------------------------------------------")
     print(f"False Positive Rate: {FPR*100}%")
     print(f"Detection Rate: {DR*100}%")
