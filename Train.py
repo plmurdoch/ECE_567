@@ -27,7 +27,7 @@ def Training_Model(file):
 
 
 def main(): #Main function where functionality is determined
-    if len(sys.argv) == 2: #Must be length 4
+    if len(sys.argv) == 2: #Must be length 2
             file_name = sys.argv[1] #csv_file is only argument
             Training_Model(file_name) #Pass to function
     else: #Showing proper input options.

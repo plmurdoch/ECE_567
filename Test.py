@@ -79,7 +79,7 @@ def Validating_Data(file, input):
 
 
 def main(): #Main function where functionality is determined
-    if len(sys.argv) == 3: #Must be length 4
+    if len(sys.argv) == 3: #Must be length 3
         input_name = sys.argv[1] #joblib filename is 1st argument (Must exist (no error checking implemented))
         file_name = sys.argv[2] #CSV file is 2nd argument
         Validating_Data(file_name, input_name) #Pass to validation function
