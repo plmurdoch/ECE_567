@@ -11,6 +11,8 @@ User running the code needs access to libraries:
 -matplotlib
 -pandas
 -sys
+Note: We were able to get the official CICFlowMeter
+running therefore all formatting will match!
 ---------------------------------------------------
 
 Train.py
