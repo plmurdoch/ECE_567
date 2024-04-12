@@ -6,14 +6,11 @@ from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 import matplotlib.pyplot as plt
 
-#CICFlowOrder, after parsing the columns from a pcap file converted from cicflowmeter we discerned that this list of columns would match the one that we constructed from the DoS dataset.
-#Utilizing the unofficial python wrapper for CICFlowmeter, as we could not get the official product to work on kali.
-CICFlowOrder =[2,3,4,6,11,12,13,14,15,16,17,18,19,20,21,22,7,8,32,35,33,34,36,39,40,37,38,41,44,45,42,43,46,47,48,49,28,29,9,10,24,23,25,26,27,50,51,52,53,54,55,77,56,57,58,75,76,69,70,73,71,72,74,78,79,80,81,59,60,31,30,63,64,61,62,67,68,65,66]
 
 #For our testing parameters, we ran the dos attack while conducting SSH traffic on the same server, thus we can isolate the true labels through the use of determining http ports were in use as the dest port from the attacker.
 def True_Values(CSV):
     true_values = [] #True value array
-    dest_prt = CSV.iloc[:,3].values #Get destination port values.
+    dest_prt = CSV.iloc[:,4].values #Get destination port values.
     for x in range(len(dest_prt)): #Iterating through the total dest ports
         if dest_prt[x] != 80: #if the taget port is not HTTP 
             true_values.append(0)
@@ -27,12 +24,13 @@ def True_Values(CSV):
 def Validating_Data(file, input):
     Machine = joblib.load(input) #Load ML joblib dump as machine
     initial_CSV = pandas.read_csv(file) #store initial dataset
-    X_val = initial_CSV.iloc[:,CICFlowOrder].values #grab values in the order to match normal input variables
+    X_val = initial_CSV.iloc[:,[2,4,5]+list(range(7,37))+list(range(40,50))+[52,53,54]+list(range(57,62))+list(range(68,83))].values #grab values in the order to match normal input variables
     scale = MaxAbsScaler() #Load standard scalar
     x_test = scale.fit_transform(X_val) #scaling x_testing data
     y_prediction = Machine.predict(x_test) #validation data
     true_values = []
-    if "Label" not in initial_CSV: #If we need to find the true values
+    if initial_CSV.isin(["No Label"]).any().any(): #If we need to find the true values
+        initial_CSV = initial_CSV.drop(columns = ["Label"])
         column = [] #initializing empty column
         for i in y_prediction: #for loop iterating over prediction
             column.append(i) #Or BENIGN
@@ -42,7 +40,7 @@ def Validating_Data(file, input):
     else:
         initial_CSV = initial_CSV.replace(["BENIGN"], 0) #Binary rep of Benign as 0
         initial_CSV = initial_CSV.replace(["DoS Hulk","DoS Slowhttptest","DoS GoldenEye","DoS slowloris"], 1) #Binary rep of DoS as 1
-        test_values = initial_CSV[:,-1].values #Grabs last column of labelled csv file
+        test_values = initial_CSV.iloc[:,-1].values #Grabs last column of labelled csv file
         for i in test_values: #iterate through dataframe columns
             true_values.append(i) #Append to a simple list.
     FP = 0 #False Positives
