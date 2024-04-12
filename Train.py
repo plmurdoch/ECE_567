@@ -11,8 +11,8 @@ from sklearn.preprocessing import MaxAbsScaler
 #First, for the input data we will discard any values that are negative or positive infinity and non-accessible numbers, to do this we convert all to numpy.nan (non-accessible number) and remove with the pandas .dropna() function.
 #For actual data we remove the string entries in the table as described in the project parameters and one more column is removed as there is a repeat of FWD Header Length at index 61.
 #We also decided to switch our data over to a binary representation where benign is 0 and any DoS is 1.
-#For our ML model, we ran the ML model with numerous different classifiers and landed on utilizing KNN as it yielded the highest accuracy in a training/testing split.
-#We found that measuring the data point against 10 closest neighbours yielded the best results without over saturating the data.
+#For our ML model, we ran the ML model with numerous different classifiers and landed on utilizing RandomForestClassifier as it yielded the highest accuracy in a training/testing split.
+#While computing relevant information RandomForestClassifier also had a built in feature_importance_ function which allowed us to eliminiate data columns which served no importances.
 def Training_Model(file):
     Parse_CSV = pandas.read_csv(file) #Read File
     Parse_CSV = Parse_CSV.replace([-numpy.inf, numpy.inf], numpy.nan) #swap any infinity with NaN.

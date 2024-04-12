@@ -18,9 +18,12 @@ def True_Values(CSV):
             true_values.append(1) #True Positive
     return true_values #Return the array
 
-#Validating_Data takes the CSV validating dataset and the joblib ML file name, it loads the ML into the variable machine, then it loads the csv file into two dataframes. 
-#The first dataframe remains the same and is used to output a modified csv with a label column for visual representation of columns reported as BENIGN or DoS.
-#The second Dataframe is the validation data manipulated so that the columns match on the same order as the training sets and transformed to fit the same standardized input.
+#Validating_Data takes the CSV validating dataset and the joblib ML file name, it loads the ML into the variable machine, then it parses the CSV file in the exact same format the joblib ML file was trained on. 
+#We need to make sure we know which kind of file is being evaluated, therefore, we look within the label column of th dataframe evaluating if there is data there or not in order to determine this.
+#If a label column is not properly occupied, we replace the label columns with the estimated values as 0 or 1 to represent benign or attack and we pass to true values to calculate legit and attack traffic.
+#If a label column is occupied properly then we simply move on as we have all the data we need to assess FP, FN, TP, TN.
+#Calculating statistics is done in a simple manner as we employ a simple binary classification of One-vs-one therefore looping through the predicted and true values we iterate the accompanying stat.
+#Finally we calculate the FPR, DR and output the ROC curve and AUC for the final results.
 def Validating_Data(file, input):
     Machine = joblib.load(input) #Load ML joblib dump as machine
     initial_CSV = pandas.read_csv(file) #store initial dataset
