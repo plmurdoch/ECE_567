@@ -13,10 +13,10 @@ def True_Values(CSV):
     dest_prt = CSV.iloc[:,4].values #Get destination port values.
     for x in range(len(dest_prt)): #Iterating through the total dest ports
         if dest_prt[x] != 80: #if the taget port is not HTTP 
-            true_values.append(0)
-        else:
-            true_values.append(1)
-    return true_values
+            true_values.append(0) #True Negative
+        else: 
+            true_values.append(1) #True Positive
+    return true_values #Return the array
 
 #Validating_Data takes the CSV validating dataset and the joblib ML file name, it loads the ML into the variable machine, then it loads the csv file into two dataframes. 
 #The first dataframe remains the same and is used to output a modified csv with a label column for visual representation of columns reported as BENIGN or DoS.
@@ -28,9 +28,9 @@ def Validating_Data(file, input):
     scale = MaxAbsScaler() #Load standard scalar
     x_test = scale.fit_transform(X_val) #scaling x_testing data
     y_prediction = Machine.predict(x_test) #validation data
-    true_values = []
-    if initial_CSV.isin(["No Label"]).any().any(): #If we need to find the true values
-        initial_CSV = initial_CSV.drop(columns = ["Label"])
+    true_values = [] #a column of the true values
+    if initial_CSV.isin(["No Label"]).any().any(): #If we need to determine if labels are valid or not first.
+        initial_CSV = initial_CSV.drop(columns = ["Label"]) #If they are not valid overwrite the labels column
         column = [] #initializing empty column
         for i in y_prediction: #for loop iterating over prediction
             column.append(i) #Or BENIGN
@@ -60,17 +60,17 @@ def Validating_Data(file, input):
                 FP = FP+1 #Then False positive.
     FPR = (FP/(FP+TN)) #False Positive Rates
     DR = (TP/(TP+FN)) #False Negatvie Rates
-    print("----------------------------------------------")
+    print("----------------------------------------------") #Section for printing FPR and DRs
     print(f"False Positive Rate: {FPR*100}%")
     print(f"Detection Rate: {DR*100}%")
     print("----------------------------------------------")
-    fpr,tpr,_=roc_curve(true_values,y_prediction)
-    auc = roc_auc_score(true_values,y_prediction)
-    plt.plot(fpr,tpr,label="AUC=%.2f"%auc)
-    plt.ylabel('True Positive Rate')
-    plt.xlabel('False Positive Rate')
-    plt.legend(loc=4)
-    plt.show()
+    fpr,tpr,_=roc_curve(true_values,y_prediction) #Collection FPR vector and TPR vector for RUC Curve graphs
+    auc = roc_auc_score(true_values,y_prediction) #Collect auc score.
+    plt.plot(fpr,tpr,label="AUC=%.2f"%auc) #Plot them on Matplot.
+    plt.ylabel('True Positive Rate') #Chart Y axis
+    plt.xlabel('False Positive Rate') #Chart X axis
+    plt.legend(loc=4) #Show legend
+    plt.show() #Show Graph
 
 
 def main(): #Main function where functionality is determined
